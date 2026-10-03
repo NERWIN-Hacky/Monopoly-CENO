@@ -1,0 +1,1435 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+    <title>Nerwin Monopoly</title> 
+ 
+    <style> 
+        * { 
+            box-sizing: border-box; 
+        } 
+ 
+        html, body { 
+            margin: 0; 
+            padding: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden;
+            background-color: #1E3A5F; 
+        } 
+.board { 
+    width: 125vmin; 
+    height: 95vmin; 
+    margin: auto; 
+    display: grid; 
+    grid-template-columns: repeat(7, 1fr); 
+    grid-template-rows: repeat(7, 1fr); 
+ 
+    column-gap: 15px; /* horizontal distance */ 
+    row-gap: 8px;     /* vertical distance */ 
+ 
+    transform: translate(-5px, 20px); 
+} 
+.square { 
+    border: 2px solid black; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    font-size: 4vmin; /* bigger number */ 
+    font-weight: bold; 
+    background-color: lightblue; 
+} 
+
+#dice {
+    display: flex;
+    gap: 20px;
+    font-size: 130px;
+    align-items: center;
+    justify-content: center;
+}
+
+.dice {
+    display: inline-block;
+    transition: transform 0.3s;
+}
+
+.dice.rolling {
+    animation: diceSpin 0.6s linear;
+}
+
+@keyframes diceSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(90deg);
+    }
+
+    50% {
+        transform: rotate(180deg);
+    }
+
+    75% {
+        transform: rotate(270deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.left-box {
+    position: absolute;
+    left: 10px;
+    top: 100px;
+    width: 220px;
+    height: 260px;
+    background-color: lightblue;
+    border: 2px solid black;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.left-box button {
+    font-size: 20px;
+    padding: 5px 15px;
+}
+.group-box {
+    position: absolute;
+    left: 10px;
+    top: 380px;
+    width: 100px;
+    height: 100px;
+    background-color: hotpink;
+    border: 2px solid black;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.group-box div {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.group-box button {
+    font-size: 14px;
+    padding: 2px 10px;
+}
+.square {
+    position: relative;
+}
+
+.pawn {
+    position: absolute;
+    color: hotpink;
+    font-size: 60px;
+    z-index: 10;
+    pointer-events: none;
+-webkit-text-stroke: 1px black;
+}
+.group-box-2 {
+    position: absolute;
+    left: 10px;
+    top: 520px;
+    width: 100px;
+    height: 100px;
+    background-color: green;
+    border: 2px solid black;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.group-box-2 div {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.group-box-2 button {
+    font-size: 14px;
+    padding: 2px 10px;
+}
+
+/* ==================== VOUCHER + CHOOSE BUTTONS ==================== */
+
+.left-buttons {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    width: 130px;
+
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    z-index: 20;
+}
+
+.left-buttons button {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+
+/* ==================== VOUCHER OVERLAY ==================== */
+
+.voucher-overlay,
+.choose-overlay {
+    display: none;
+    position: fixed;
+    left: 20px;
+    right: 20px;
+    top: 20px;
+    bottom: 20px;
+
+    background-color: lightblue;
+    border: 3px solid black;
+
+    z-index: 2000;
+}
+
+
+/* ==================== VOUCHER WHEEL ==================== */
+
+.voucher-wheel-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+}
+
+.voucher-wheel {
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    border: 5px solid black;
+
+    background: conic-gradient(
+        #ff6666 0deg 45deg,
+        #66ccff 45deg 90deg,
+        #66ff99 90deg 135deg,
+        #ffcc66 135deg 180deg,
+        #cc99ff 180deg 225deg,
+        #ff9999 225deg 270deg,
+        #99ffcc 270deg 315deg,
+        #ffff66 315deg 360deg
+    );
+
+    position: relative;
+
+    transition: transform 3s cubic-bezier(0.15, 0.85, 0.25, 1);
+}
+
+.voucher-wheel-text {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.voucher-wheel-text span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 80px;
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+    transform-origin: 0 0;
+}
+
+.vt1 { transform: rotate(-67.5deg) translate(100px, -15px); }
+.vt2 { transform: rotate(-22.5deg) translate(100px, -15px); }
+.vt3 { transform: rotate(22.5deg) translate(100px, -15px); }
+.vt4 { transform: rotate(67.5deg) translate(100px, -15px); }
+.vt5 { transform: rotate(112.5deg) translate(100px, -15px); }
+.vt6 { transform: rotate(157.5deg) translate(100px, -15px); }
+.vt7 { transform: rotate(202.5deg) translate(100px, -15px); }
+.vt8 { transform: rotate(247.5deg) translate(100px, -15px); }
+
+.voucher-arrow {
+    position: absolute;
+    top: calc(50% - 230px);
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 0;
+    height: 0;
+
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-top: 35px solid black;
+
+    z-index: 5;
+}
+
+.voucher-spin-button {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 8px 30px;
+    cursor: pointer;
+}
+
+#voucherResult {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+
+/* ==================== CHOOSE OVERLAY ==================== */
+
+.choose-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.choose-boxes {
+    display: flex;
+    gap: 25px;
+}
+
+.choose-box {
+    width: 180px;
+    height: 180px;
+
+    background-color: white;
+    border: 3px solid black;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 40px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.choose-box:hover {
+    background-color: #eeeeee;
+}
+
+#chooseResult {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.overlay-return {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+
+    font-size: 20px;
+    font-weight: bold;
+    padding: 8px 25px;
+
+    cursor: pointer;
+}
+
+.pawn2 {
+    position: absolute;
+    color: green;
+    font-size: 60px;
+    z-index: 10;
+    pointer-events: none;
+-webkit-text-stroke: 1px black;
+}
+
+.group-box-3 {
+    position: absolute;
+    left: 130px;
+    top: 380px;
+    width: 100px;
+    height: 100px;
+    background-color: blue;
+    border: 2px solid black;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.group-box-3 div {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.group-box-3 button {
+    font-size: 14px;
+    padding: 2px 10px;
+}
+
+.group-box-4 {
+    position: absolute;
+     left: 130px;
+    top: 520px;
+    width: 100px;
+    height: 100px;
+    background-color: orange;
+    border: 2px solid black;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.group-box-4 div {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.group-box-4 button {
+    font-size: 14px;
+    padding: 2px 10px;
+}
+
+.pawn3 {
+    position: absolute;
+    color: blue;
+    font-size: 60px;
+    z-index: 10;
+    pointer-events: none;
+-webkit-text-stroke: 1px black;
+}
+
+.pawn4 {
+    position: absolute;
+    color: orange;
+    font-size: 60px;
+    z-index: 10;
+    pointer-events: none;
+-webkit-text-stroke: 1px black;
+}
+
+.winner-box {
+    position: absolute;
+    right: 10px;
+    top: 480px;
+    width: 230px;
+    min-height: 170px;
+    background-color: lightblue;
+    border: 2px solid black;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+.winner-box-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#winner {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* ==================== QUESTION BUTTON ==================== */
+
+.question-button {
+    position: absolute;
+    right: 10px;
+    top: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 4px 20px;
+    cursor: pointer;
+    z-index: 15;
+    background-color: lightblue;
+}
+
+/* ==================== QUESTION BOX ==================== */
+
+.question-overlay {
+    display: none;
+    position: fixed;
+    left: 20px;
+    right: 20px;
+    top: 20px;
+    bottom: 20px;
+    background-color: lightblue;
+    border: 3px solid black;
+    z-index: 1000;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.question-text {
+    font-size: 70px;
+    font-weight: bold;
+}
+
+.return-button {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 8px 25px;
+    cursor: pointer;
+    background-color: lightblue;
+}
+/* ==================== SPINNING WHEEL ==================== */
+
+.wheel-box {
+    position: absolute;
+    right: 10px;
+    top: 100px;
+    width: 230px;
+    height: 350px;
+    background-color: lightblue;
+    border: 2px solid black;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.wheel {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    border: 4px solid black;
+
+    background: conic-gradient(
+        hotpink 0deg 120deg,
+        lightgreen 120deg 240deg,
+        lightskyblue 240deg 360deg
+    );
+
+    position: relative;
+
+    transition: transform 3s cubic-bezier(0.15, 0.85, 0.25, 1);
+}
+
+.wheel-text {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.wheel-text span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: 0 0;
+}
+
+.block-text {
+    transform: rotate(-60deg) translate(35px, -10px);
+}
+
+.steal-text {
+    transform: rotate(60deg) translate(35px, -10px);
+}
+
+.proceed-text {
+    transform: rotate(180deg) translate(35px, -10px);
+}
+
+.wheel-arrow {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 0;
+    height: 0;
+
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 25px solid black;
+
+    z-index: 5;
+}
+
+.spin-button {
+    font-size: 20px;
+    font-weight: bold;
+    padding: 6px 25px;
+    cursor: pointer;
+}
+
+    </style> 
+</head> 
+ 
+<body> 
+<div class="left-box"><div id="dice">
+    <span id="dice1" class="dice">⚀</span>
+    <span id="dice2" class="dice">⚀</span>
+</div>
+
+<button onclick="rollDice()">Roll</button>
+</div>
+
+<div class="left-buttons">
+    <button onclick="openVoucher()">Voucher</button>
+    <button onclick="openChoose()">Choose</button>
+</div>
+
+<div class="group-box">
+    <div>Group 1</div>
+    <button onclick="movePawnUp()">Up</button>
+    <button onclick="movePawnDown()">Down</button>
+</div>
+
+
+<div class="group-box-2">
+    <div>Group 3</div>
+    <button onclick="movePawn2Up()">Up</button>
+    <button onclick="movePawn2Down()">Down</button>
+</div>
+
+<div class="group-box-3">
+    <div>Group 2</div>
+    <button onclick="movePawn3Up()">Up</button>
+    <button onclick="movePawn3Down()">Down</button>
+</div>
+
+<div class="group-box-4">
+    <div>Group 4</div>
+    <button onclick="movePawn4Up()">Up</button>
+    <button onclick="movePawn4Down()">Down</button>
+</div>
+<div class="winner-box">
+    <div class="winner-box-title">Finish</div>
+    <div id="winner"></div>
+</div>
+
+<!-- QUESTION BUTTON -->
+<button class="question-button" onclick="openQuestions()">
+    QUESTION
+</button>
+
+<!-- QUESTION OVERLAY -->
+<div class="question-overlay" id="questionOverlay">
+
+    <div class="question-text" id="questionText"></div>
+
+    <button class="return-button" onclick="closeQuestions()">
+        RETURN
+    </button>
+
+</div>
+
+<!-- ==================== VOUCHER OVERLAY ==================== -->
+
+<div class="voucher-overlay" id="voucherOverlay">
+
+    <div class="voucher-arrow"></div>
+
+    <div class="voucher-wheel-container">
+
+        <div class="voucher-wheel" id="voucherWheel">
+
+            <div class="voucher-wheel-text">
+                <span class="vt1">*2</span>
+                <span class="vt2">/2</span>
+                <span class="vt3">-2</span>
+                <span class="vt4">+2</span>
+                <span class="vt5">-3</span>
+                <span class="vt6">-1</span>
+                <span class="vt7">-5</span>
+                <span class="vt8">+5</span>
+            </div>
+
+        </div>
+
+        <button class="voucher-spin-button" onclick="spinVoucher()">
+            SPIN
+        </button>
+
+        <div id="voucherResult"></div>
+
+    </div>
+
+    <button class="overlay-return" onclick="closeVoucher()">
+        RETURN
+    </button>
+
+</div>
+
+<!-- ==================== CHOOSE OVERLAY ==================== -->
+
+<div class="choose-overlay" id="chooseOverlay">
+
+    <div class="choose-container">
+
+        <div class="choose-boxes">
+
+            <div class="choose-box" onclick="chooseNumber(this)">
+                ?
+            </div>
+
+            <div class="choose-box" onclick="chooseNumber(this)">
+                ?
+            </div>
+
+            <div class="choose-box" onclick="chooseNumber(this)">
+                ?
+            </div>
+
+            <div class="choose-box" onclick="chooseNumber(this)">
+                ?
+            </div>
+
+        </div>
+
+        <div id="chooseResult"></div>
+
+    </div>
+
+    <button class="overlay-return" onclick="closeChoose()">
+        RETURN
+    </button>
+
+</div>
+
+
+<div class="wheel-box">
+
+    <div class="wheel-arrow"></div>
+
+    <div class="wheel" id="wheel">
+
+        <div class="wheel-text">
+            <span class="block-text">BLOCK</span>
+            <span class="steal-text">VOUCHER</span>
+            <span class="proceed-text">PROCEED</span>
+        </div>
+
+    </div>
+
+    <button class="spin-button" onclick="spinWheel()">
+        SPIN
+    </button>
+
+</div>
+
+<div class="board"> 
+ <div class="square" data-number="7">7</div>
+<div class="square" data-number="8">8</div>
+<div class="square" data-number="9">9</div>
+<div class="square" data-number="10">10</div>
+<div class="square" data-number="11">11</div>
+<div class="square" data-number="12">12</div>
+<div class="square" data-number="13">13</div>
+
+<div class="square" data-number="6">6</div>
+<div class="square" data-number="29">29</div>
+<div class="square" data-number="30">30</div>
+<div class="square" data-number="31">31</div>
+<div class="square" data-number="32">32</div>
+<div class="square" data-number="33">33</div>
+<div class="square" data-number="14">14</div>
+
+<div class="square" data-number="5">5</div>
+<div class="square" data-number="28">28</div>
+<div class="square" data-number="43">43</div>
+<div class="square" data-number="44">44</div>
+<div class="square" data-number="45">45</div>
+<div class="square" data-number="34">34</div>
+<div class="square" data-number="15">15</div>
+
+<div class="square" data-number="4">4</div>
+<div class="square" data-number="27">27</div>
+<div class="square" data-number="42">42</div>
+<div class="square" data-number="49">49</div>
+<div class="square" data-number="46">46</div>
+<div class="square" data-number="35">35</div>
+<div class="square" data-number="16">16</div>
+
+<div class="square" data-number="3">3</div>
+<div class="square" data-number="26">26</div>
+<div class="square" data-number="41">41</div>
+<div class="square" data-number="48">48</div>
+<div class="square" data-number="47">47</div>
+<div class="square" data-number="36">36</div>
+<div class="square" data-number="17">17</div>
+
+<div class="square" data-number="2">2</div>
+<div class="square" data-number="25">25</div>
+<div class="square" data-number="40">40</div>
+<div class="square" data-number="39">39</div>
+<div class="square" data-number="38">38</div>
+<div class="square" data-number="37">37</div>
+<div class="square" data-number="18">18</div>
+
+<div class="square" data-number="1">1</div>
+<div class="square" data-number="24">24</div>
+<div class="square" data-number="23">23</div>
+<div class="square" data-number="22">22</div>
+<div class="square" data-number="21">21</div>
+<div class="square" data-number="20">20</div>
+<div class="square" data-number="19">19</div>
+ 
+</div> 
+ 
+</body> 
+<script>
+
+// ==================== DICE ====================
+
+function rollDice() {
+
+    const diceFaces = [
+        "⚀",
+        "⚁",
+        "⚂",
+        "⚃",
+        "⚄",
+        "⚅"
+    ];
+
+    const dice1 = document.getElementById("dice1");
+    const dice2 = document.getElementById("dice2");
+
+    // Dice 1 can only show 1-4
+    const random1 = Math.floor(Math.random() * 4);
+
+    // Dice 2 can show 1-6
+    const random2 = Math.floor(Math.random() * 6);
+
+    // Restart animation
+    dice1.classList.remove("rolling");
+    dice2.classList.remove("rolling");
+
+    // Force browser to restart animation
+    void dice1.offsetWidth;
+    void dice2.offsetWidth;
+
+    dice1.classList.add("rolling");
+    dice2.classList.add("rolling");
+
+    // Show results after spinning
+    setTimeout(function() {
+
+        dice1.textContent = diceFaces[random1];
+        dice2.textContent = diceFaces[random2];
+
+    }, 600);
+}
+
+
+// ==================== BORDER THICKNESS ====================
+
+document.querySelectorAll(".square").forEach(square => {
+    const number = parseInt(square.textContent);
+    square.style.borderWidth = (number * 0.2) + "px";
+});
+
+
+// ==================== FINISH ORDER ====================
+
+let finishOrder = [];
+
+function getSuffix(number) {
+    if (number === 1) {
+        return "st";
+    } else if (number === 2) {
+        return "nd";
+    } else if (number === 3) {
+        return "rd";
+    } else {
+        return "th";
+    }
+}
+
+function updateFinishBox() {
+
+    const winnerBox = document.getElementById("winner");
+
+    // If nobody has finished, show nothing
+    if (finishOrder.length === 0) {
+        winnerBox.innerHTML = "";
+        return;
+    }
+
+    // Show the current finishing order
+    winnerBox.innerHTML = "";
+
+    finishOrder.forEach((player, index) => {
+
+        const place = index + 1;
+        const line = document.createElement("div");
+
+        line.textContent =
+            place + getSuffix(place) + " " + player;
+
+        winnerBox.appendChild(line);
+    });
+}
+
+
+// Add a player to the finish list
+function checkWinner(position, color) {
+
+    // Only add the player when they reach 49
+    if (position === 49) {
+
+        // Don't add the same player twice
+        if (!finishOrder.includes(color)) {
+
+            finishOrder.push(color);
+
+            updateFinishBox();
+        }
+    }
+}
+
+
+// Remove a player from the finish list
+function removeFromFinish(color) {
+
+    const index = finishOrder.indexOf(color);
+
+    if (index !== -1) {
+
+        finishOrder.splice(index, 1);
+
+        // Re-number everyone after removing the player
+        updateFinishBox();
+    }
+}
+
+
+// ==================== GROUP 1 ====================
+
+let group1Position = 1;
+
+function updatePawn() {
+
+    document.querySelectorAll(".pawn").forEach(pawn => {
+        pawn.remove();
+    });
+
+    const square = document.querySelector(
+        `.square[data-number="${group1Position}"]`
+    );
+
+    if (square) {
+
+        const pawn = document.createElement("div");
+
+        pawn.className = "pawn";
+        pawn.textContent = "♟";
+
+        square.appendChild(pawn);
+    }
+}
+
+
+function movePawnUp() {
+
+    if (group1Position < 49) {
+
+        group1Position++;
+
+        updatePawn();
+
+        checkWinner(group1Position, "Pink");
+    }
+}
+
+
+function movePawnDown() {
+
+    // If Pink is currently at 49,
+    // remove Pink from the finish list
+    if (group1Position === 49) {
+
+        removeFromFinish("Pink");
+    }
+
+    if (group1Position > 1) {
+
+        group1Position--;
+
+        updatePawn();
+    }
+}
+let wheelRotation = 0;
+
+function spinWheel() {
+
+    const wheel = document.getElementById("wheel");
+    const resultBox = document.getElementById("wheel-result");
+
+    const results = [
+        "BLOCK",
+        "STEAL",
+        "PROCEED"
+    ];
+
+    // Randomly choose a result
+    const result = Math.floor(Math.random() * 3);
+
+    const sectionAngle = 120;
+
+    // Center of selected section
+    const sectionCenter = result * sectionAngle + 60;
+
+    // Current wheel angle
+    const currentAngle =
+        ((wheelRotation % 360) + 360) % 360;
+
+    // Target angle
+    const targetAngle =
+        (360 - sectionCenter) % 360;
+
+    // Exact movement needed
+    const delta =
+        (targetAngle - currentAngle + 360) % 360;
+
+    // Add 5 full rotations
+    wheelRotation += 5 * 360 + delta;
+
+    wheel.style.transform =
+        `rotate(${wheelRotation}deg)`;
+
+    resultBox.textContent = results[result];
+}
+// ==================== GROUP 2 ====================
+
+let group2Position = 1;
+
+function updatePawn2() {
+
+    document.querySelectorAll(".pawn2").forEach(pawn => {
+        pawn.remove();
+    });
+
+    const square = document.querySelector(
+        `.square[data-number="${group2Position}"]`
+    );
+
+    if (square) {
+
+        const pawn = document.createElement("div");
+
+        pawn.className = "pawn2";
+        pawn.textContent = "♟";
+
+        square.appendChild(pawn);
+    }
+}
+
+
+function movePawn2Up() {
+
+    if (group2Position < 49) {
+
+        group2Position++;
+
+        updatePawn2();
+
+        checkWinner(group2Position, "Green");
+    }
+}
+
+
+function movePawn2Down() {
+
+    if (group2Position === 49) {
+
+        removeFromFinish("Green");
+    }
+
+    if (group2Position > 1) {
+
+        group2Position--;
+
+        updatePawn2();
+    }
+}
+
+
+// ==================== GROUP 3 ====================
+
+let group3Position = 1;
+
+function updatePawn3() {
+
+    document.querySelectorAll(".pawn3").forEach(pawn => {
+        pawn.remove();
+    });
+
+    const square = document.querySelector(
+        `.square[data-number="${group3Position}"]`
+    );
+
+    if (square) {
+
+        const pawn = document.createElement("div");
+
+        pawn.className = "pawn3";
+        pawn.textContent = "♟";
+
+        square.appendChild(pawn);
+    }
+}
+
+
+function movePawn3Up() {
+
+    if (group3Position < 49) {
+
+        group3Position++;
+
+        updatePawn3();
+
+        checkWinner(group3Position, "Blue");
+    }
+}
+
+
+function movePawn3Down() {
+
+    if (group3Position === 49) {
+
+        removeFromFinish("Blue");
+    }
+
+    if (group3Position > 1) {
+
+        group3Position--;
+
+        updatePawn3();
+    }
+}
+
+
+// ==================== GROUP 4 ====================
+
+let group4Position = 1;
+
+function updatePawn4() {
+
+    document.querySelectorAll(".pawn4").forEach(pawn => {
+        pawn.remove();
+    });
+
+    const square = document.querySelector(
+        `.square[data-number="${group4Position}"]`
+    );
+
+    if (square) {
+
+        const pawn = document.createElement("div");
+
+        pawn.className = "pawn4";
+        pawn.textContent = "♟";
+
+        square.appendChild(pawn);
+    }
+}
+
+
+function movePawn4Up() {
+
+    if (group4Position < 49) {
+
+        group4Position++;
+
+        updatePawn4();
+
+        checkWinner(group4Position, "Orange");
+    }
+}
+
+
+function movePawn4Down() {
+
+    if (group4Position === 49) {
+
+        removeFromFinish("Orange");
+    }
+
+    if (group4Position > 1) {
+
+        group4Position--;
+
+        updatePawn4();
+    }
+}
+
+
+// ==================== STARTING POSITIONS ====================
+
+updatePawn();
+updatePawn2();
+updatePawn3();
+updatePawn4();
+
+updateFinishBox();
+
+// ==================== QUESTIONS ====================
+
+// ==================== VOUCHER ====================
+
+let voucherRotation = 0;
+
+function openVoucher() {
+    document.getElementById("voucherOverlay").style.display = "block";
+}
+
+function closeVoucher() {
+    document.getElementById("voucherOverlay").style.display = "none";
+}
+
+function spinVoucher() {
+
+    const wheel = document.getElementById("voucherWheel");
+
+    const results = [
+        "*2",
+        "/2",
+        "-2",
+        "+2",
+        "-3",
+        "-1",
+        "-5",
+        "+5"
+    ];
+
+    const random = Math.floor(Math.random() * results.length);
+
+    const sectionAngle = 45;
+
+    // Center of the selected section
+    const sectionCenter = random * sectionAngle + 22.5;
+
+    const currentAngle =
+        ((voucherRotation % 360) + 360) % 360;
+
+    const targetAngle =
+        (360 - sectionCenter) % 360;
+
+    const delta =
+        (targetAngle - currentAngle + 360) % 360;
+
+    // Add 5 complete rotations
+    voucherRotation += 5 * 360 + delta;
+
+    wheel.style.transform =
+        `rotate(${voucherRotation}deg)`;
+
+    setTimeout(function() {
+        document.getElementById("voucherResult").textContent =
+            "Result: " + results[random];
+    }, 5000);
+}
+
+
+// ==================== CHOOSE ====================
+
+function openChoose() {
+
+    document.getElementById("chooseOverlay").style.display = "block";
+
+    // Generate 4 different numbers from 1-10
+    const numbers = [];
+
+    while (numbers.length < 4) {
+
+        const number =
+            Math.floor(Math.random() * 4) + 1;
+
+        if (!numbers.includes(number)) {
+            numbers.push(number);
+        }
+    }
+
+    const boxes =
+        document.querySelectorAll(".choose-box");
+
+    boxes.forEach(function(box, index) {
+
+        box.textContent = "?";
+
+        // Store the generated number
+        box.dataset.number = numbers[index];
+
+    });
+
+    document.getElementById("chooseResult").textContent = "";
+}
+
+
+function closeChoose() {
+
+    document.getElementById("chooseOverlay").style.display = "none";
+
+}
+
+
+function chooseNumber(box) {
+
+    // Show the number inside the selected box
+    box.textContent = box.dataset.number;
+
+    document.getElementById("chooseResult").textContent =
+        "You chose: " + box.dataset.number;
+
+}
+// ==================== QUESTIONS ====================
+
+const questions = [
+    "Which civil engineering field deals with the behavior and properties of soil and rock?",
+
+    "Which field focuses on managing and controlling water for purposes such as flood control and irrigation?",
+
+    "Which field uses solutions involving wastewater treatment and pollution control?",
+
+    "Which field plans communities so that roads, utilities, buildings, and public spaces work together?",
+
+    "Which field uses surveying equipment, GPS, drones, and GIS to analyze land?",
+
+    "Which civil engineering field deals with erosion control and structures affected by waves and tides?",
+
+    "What does Structural Engineering aim to ensure when designing structures?",
+
+    "What does Transportation Engineering aim to achieve when designing transportation systems?",
+
+    "What does Construction Engineering manage besides the actual construction work?",
+
+    "What type of engineering focuses on designing and maintaining pavements?",
+
+    "Which career is responsible for preparing construction schedules?",
+
+    "Which career calculates expected costs of materials, labor, equipment, and construction work?",
+
+    "Which career measures quantities of work and materials?",
+
+    "Which career creates engineering designs, calculations, and technical drawings?",
+
+    "Which career prepares technical documents, reports, drawings, and project records?",
+
+    "Which career coordinates the overall project budget, schedule, resources, and coordination?",
+
+    "What skill helps engineers deal with unexpected technical and construction-site problems?",
+
+    "What skill is needed to coordinate with contractors, clients, suppliers, and other engineers?",
+
+    "What skill helps construction engineers supervise workers and coordinate teams?",
+
+    "What skill ensures that construction work is safe and meets required standards?",
+
+    "How did construction methods change from the past to the present?",
+
+    "What did engineers mainly use for planning in the past?",
+
+    "Name two modern tools used for more accurate engineering planning.",
+
+    "How have materials used in civil engineering changed?",
+
+    "What was the main focus of past civil engineering projects?",
+
+    "What modern projects are now included in civil engineering?",
+
+    "Which engineer establishes locations and elevations needed for construction?",
+
+    "Which engineer monitors site safety and identifies possible hazards?",
+
+    "Which engineer checks if construction work and materials meet quality and compliance requirements?",
+
+    "What are three important skills a civil engineer must have?",
+
+    "Water Resources Engineering focuses on the management, control, and use of water, including ______.",
+    
+    "Past civil engineering trends focused mainly on ______.",
+
+    "______ focuses more on sustainability, technology, efficiency, safety, and resilience.",
+
+    "Civil Engineering is a profession of designing and ______ that people and communities need for everyday life.",
+
+    "Construction engineering focuses on the planning, management, and execution of ______.",
+
+    "Which of the following is NOT included among the infrastructure examples discussed in the presentation?\nA. Water systems\nB. Transportation systems\nC. Public facilities\nD. Computer systems",
+
+    "Civil engineering contributes to economic growth mainly by:\nA. Improving transportation and supporting businesses\nB. Designing structures and reducing construction time\nC. Managing resources and improving construction quality\nD. Planning communities and maintaining public spaces",
+
+    "Which combination represents concerns that modern civil engineers help address?\nA. Economic growth, transportation, and public facilities\nB. Environmental concerns, climate change, and natural disasters\nC. Construction costs, project schedules, and material quality\nD. Community planning, land measurement, and transportation systems",
+
+    "Which statement BEST describes why civil engineering is important?\nA. It focuses mainly on designing structures for large-scale projects.\nB. It provides infrastructure needed for people and communities to live, work, and travel.\nC. It primarily manages construction workers, materials, and project schedules.\nD. It mainly develops technologies used for modern construction.",
+
+    "Which combination is specifically mentioned as contributing to economic growth?\nA. Improving transportation, supporting businesses, and connecting communities\nB. Improving safety, managing resources, and designing structures\nC. Protecting the environment, controlling pollution, and treating wastewater\nD. Measuring land, analyzing locations, and using surveying equipment",
+
+    "Civil engineering only involves the construction of buildings. True or False?",
+
+    "Civil engineering can involve the operation and maintenance of infrastructure. True or False?",
+
+    "Civil engineering helps connect communities. True or False?",
+
+    "Modern civil engineers are concerned only with building large structures. True or False?",
+
+    "Civil engineering can help create safe and reliable public facilities. True or False?",
+
+    "Why is civil engineering important to communities?",
+
+    "How does civil engineering support businesses?",
+
+    "Why is safety important in civil engineering?",
+
+    "How does civil engineering help people travel?",
+
+    "Why do modern civil engineers consider sustainability?"
+];
+function openQuestions() {
+
+    // Pick a random question
+    const randomIndex =
+        Math.floor(Math.random() * questions.length);
+
+    document.getElementById("questionText").textContent =
+        questions[randomIndex];
+
+    // Show question box
+    document.getElementById("questionOverlay").style.display = "block";
+}
+
+function closeQuestions() {
+    document.getElementById("questionOverlay").style.display = "none";
+}
+
+</script>
+</html> 
